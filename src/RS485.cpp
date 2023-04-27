@@ -1,0 +1,39 @@
+#include "RS485.h"
+#include "CRC16.h"
+
+CRC16 CRC;
+
+void RS485::init(Stream &stream)
+{
+  _serial = &stream;
+}
+
+void RS485::request(byte Address, unsigned short Register)
+{
+  byte data[] = {Address, 0x03, highByte(Register), lowByte(Register), (byte)0, 0x01};
+  unsigned short checksum = CRC.Modbus(data, 0, 6);
+  _serial->write(data[0]);
+  _serial->write(data[1]);
+  _serial->write(data[2]);
+  _serial->write(data[3]);
+  _serial->write(data[4]);
+  _serial->write(data[5]);
+  //CRC-16/MODBUS
+  _serial->write(lowByte(checksum));
+  _serial->write(highByte(checksum));
+}
+
+void RS485::write(byte Address, unsigned short Register, byte value)
+{
+  byte data[] = {Address, 0x06, highByte(Register), lowByte(Register), (byte)0, value};
+  unsigned short checksum = CRC.Modbus(data, 0, 6);
+  _serial->write(data[0]);
+  _serial->write(data[1]);
+  _serial->write(data[2]);
+  _serial->write(data[3]);
+  _serial->write(data[4]);
+  _serial->write(data[5]);
+  //CRC-16/MODBUS
+  _serial->write(lowByte(checksum));
+  _serial->write(highByte(checksum));
+}
