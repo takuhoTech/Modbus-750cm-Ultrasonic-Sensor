@@ -3,15 +3,19 @@
 
 CRC16 CRC;
 
-void RS485::init(Stream &stream)
+void RS485::init(Stream &stream, int CTRLpin)
 {
   _serial = &stream;
+  CTRL = CTRLpin;
+  pinMode(CTRL, OUTPUT);
+  digitalWrite(CTRL, LOW);
 }
 
 void RS485::request(byte Address, unsigned short Register)
 {
   byte data[] = {Address, 0x03, highByte(Register), lowByte(Register), (byte)0, 0x01};
   unsigned short checksum = CRC.Modbus(data, 0, 6);
+  digitalWrite(CTRL, HIGH);
   _serial->write(data[0]);
   _serial->write(data[1]);
   _serial->write(data[2]);
@@ -21,12 +25,16 @@ void RS485::request(byte Address, unsigned short Register)
   //CRC-16/MODBUS
   _serial->write(lowByte(checksum));
   _serial->write(highByte(checksum));
+  //wait until transmission ends
+  _serial->flush();
+  digitalWrite(CTRL, LOW);
 }
 
 void RS485::write(byte Address, unsigned short Register, byte value)
 {
   byte data[] = {Address, 0x06, highByte(Register), lowByte(Register), (byte)0, value};
   unsigned short checksum = CRC.Modbus(data, 0, 6);
+  digitalWrite(CTRL, HIGH);
   _serial->write(data[0]);
   _serial->write(data[1]);
   _serial->write(data[2]);
@@ -36,4 +44,7 @@ void RS485::write(byte Address, unsigned short Register, byte value)
   //CRC-16/MODBUS
   _serial->write(lowByte(checksum));
   _serial->write(highByte(checksum));
+  //wait until transmission ends
+  _serial->flush();
+  digitalWrite(CTRL, LOW);
 }
