@@ -48,3 +48,18 @@ void RS485::write(byte Address, unsigned short Register, byte value)
   _serial->flush();
   digitalWrite(CTRL, LOW);
 }
+
+long RS485::read()
+{
+  if (_serial->available() < 7)
+  {
+    return -1;
+  }
+  for (int i = 0; i < sizeof(buff); i++)
+  {
+    buff[i] = _serial->read();
+    delayMicroseconds(10);
+  }
+  dist = (buff[3] << 8) | buff[4];
+  return dist;
+}

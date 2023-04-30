@@ -14,6 +14,9 @@ class RS485
     void init(Stream &stream, int CTRLpin);
     void request(byte Address, unsigned short Register);
     void write(byte Address, unsigned short Register, byte value);
+    long read();
+    char buff[11];
+    long dist;
   private:
     Stream* _serial;
     int CTRL;
