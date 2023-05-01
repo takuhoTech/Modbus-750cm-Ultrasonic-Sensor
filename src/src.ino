@@ -14,11 +14,15 @@ void setup() {
 }
 
 void loop() {
-  if (Sensor.read() != -1)
+  Sensor.request(ULTRASONIC, CALCULATED);
+  while (1)
   {
-    Serial.print(Sensor.dist); Serial.println("mm");
-    Sensor.request(ULTRASONIC, REALTIME);
-    Serial.println("requested");
+    if (Sensor.read() != -1)
+    {
+      Serial.print(Sensor.dist); Serial.println("mm");
+      Sensor.request(ULTRASONIC, CALCULATED);
+      Serial.println("requested");
+    }
+    delay(100);//CALCULATEDモードの場合、ここが10msだとフリーズします。
   }
-  delay(100);
 }
